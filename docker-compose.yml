@@ -12,6 +12,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 10
+    mem_limit: 384m
 
   app:
     build: ./app
@@ -23,10 +24,43 @@ services:
       POSTGRES_URL: jdbc:postgresql://postgres:5432/petclinic
       POSTGRES_USER: petclinic
       POSTGRES_PASS: petclinic
+      JAVA_TOOL_OPTIONS: "-Xmx400m -XX:MaxMetaspaceSize=160m"
+    command:
+      - --management.endpoints.web.exposure.include=health,info,prometheus
+      - --management.metrics.distribution.percentiles-histogram.http.server.requests=true
     ports:
       - "8080:8080"
     cpus: "2"
-    mem_limit: 1g
+    mem_limit: 768m
+
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter
+    environment:
+      DATA_SOURCE_NAME: postgresql://petclinic:petclinic@postgres:5432/petclinic?sslmode=disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 128m
+
+  prometheus:
+    image: prom/prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    mem_limit: 256m
+
+  grafana:
+    image: grafana/grafana
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+    mem_limit: 256m
 
 volumes:
   pgdata:
+  grafana-data:
