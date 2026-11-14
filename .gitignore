@@ -1,1 +1,5 @@
 results/
+*.hprof
+*.jtl
+results/
+report/
