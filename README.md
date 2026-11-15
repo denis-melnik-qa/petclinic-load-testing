@@ -32,12 +32,13 @@ Load model: closed (fixed number of users), 100ms think time between requests, 5
 
 **Result:** maximum load meeting the criteria is about 70 users; the first step that violates them is 80 users. Throughput peaks at 157 req/s around 60 users and declines afterwards (146 req/s at 80 users, 132 req/s at 100 users), while response times grow due to queueing (no errors).
 
-**Confirmation:** a 10-minute run at 70 users (after 60s ramp-up):
+**Confirmation:** a separate 10-minute run at 70 users (after 60s ramp-up):
 167 req/s, avg 310ms, p95 851ms, p99 1304ms, 0% errors.
+Within this confirmation run, the slowest request is the search by last name (GET /owners): it alone exceeds 1s at p95 (1176ms), while the overall p95 is 851ms because the other requests are faster.
 
 **Findings**
 - Bottleneck: the application and the database together consume about 180% of the 2 CPU cores available to Docker, starting from 40 users. This is a combined figure (app + DB), observed in Grafana, not a JMeter metric. The limit is therefore the CPU of the whole host.
 - Slowest request: the search by last name (GET /owners).
-- req/s are JMeter counts. The server sees about 1.4× more requests because of redirects after POST. This explains the difference from Grafana's request rate (e.g. 157 × 1.4 ≈ 220).
+- req/s are JMeter counts. The server sees about 1.4× more requests because of redirects after POST. This explains the difference from Grafana's request rate (157 * 1.4 ≈ 220).
 
 **Notes:** req/s are JMeter counts (the server sees about 1.4x more requests because of redirects after POST). Everything (application, database, monitoring and the load generator) runs on one machine with 6 GB RAM, so absolute numbers are not representative of production hardware; the project demonstrates the methodology. Maximum response times of 7-11 s in the raw data are one-off stalls of the whole host, so percentiles are used instead.
