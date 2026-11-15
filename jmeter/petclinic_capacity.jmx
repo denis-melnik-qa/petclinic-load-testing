@@ -72,51 +72,72 @@
       <hashTree/>
       <kg.apc.jmeter.threads.UltimateThreadGroup guiclass="kg.apc.jmeter.threads.UltimateThreadGroupGui" testclass="kg.apc.jmeter.threads.UltimateThreadGroup" testname="jp@gc - Ultimate Thread Group">
         <collectionProp name="ultimatethreadgroupdata">
-          <collectionProp name="377724559">
-            <stringProp name="53">5</stringProp>
+          <collectionProp name="554373813">
+            <stringProp name="1567">10</stringProp>
             <stringProp name="0">0</stringProp>
+            <stringProp name="30">30</stringProp>
+            <stringProp name="1537431">2070</stringProp>
+            <stringProp name="0"></stringProp>
+          </collectionProp>
+          <collectionProp name="827192529">
+            <stringProp name="1567">10</stringProp>
+            <stringProp name="49617">210</stringProp>
+            <stringProp name="30">30</stringProp>
+            <stringProp name="1515297">1860</stringProp>
+            <stringProp name="0"></stringProp>
+          </collectionProp>
+          <collectionProp name="-692690063">
+            <stringProp name="1567">10</stringProp>
+            <stringProp name="51570">420</stringProp>
+            <stringProp name="30">30</stringProp>
+            <stringProp name="1513344">1650</stringProp>
+            <stringProp name="0"></stringProp>
+          </collectionProp>
+          <collectionProp name="380483377">
+            <stringProp name="1567">10</stringProp>
+            <stringProp name="53523">630</stringProp>
             <stringProp name="30">30</stringProp>
             <stringProp name="1511391">1440</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="2055031507">
-            <stringProp name="53">5</stringProp>
-            <stringProp name="49617">210</stringProp>
+          <collectionProp name="19227793">
+            <stringProp name="1567">10</stringProp>
+            <stringProp name="55476">840</stringProp>
             <stringProp name="30">30</stringProp>
             <stringProp name="1509438">1230</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="-1614223529">
+          <collectionProp name="1408898322">
             <stringProp name="1567">10</stringProp>
-            <stringProp name="51570">420</stringProp>
+            <stringProp name="1507578">1050</stringProp>
             <stringProp name="30">30</stringProp>
             <stringProp name="1507485">1020</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="861970966">
+          <collectionProp name="-386726872">
             <stringProp name="1567">10</stringProp>
-            <stringProp name="53523">630</stringProp>
+            <stringProp name="1509531">1260</stringProp>
             <stringProp name="30">30</stringProp>
             <stringProp name="55383">810</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="1218315286">
+          <collectionProp name="-1929757071">
             <stringProp name="1567">10</stringProp>
-            <stringProp name="55476">840</stringProp>
+            <stringProp name="1511484">1470</stringProp>
             <stringProp name="30">30</stringProp>
             <stringProp name="53430">600</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="-1716965890">
+          <collectionProp name="-886568040">
             <stringProp name="1567">10</stringProp>
-            <stringProp name="1507578">1050</stringProp>
+            <stringProp name="1513437">1680</stringProp>
             <stringProp name="30">30</stringProp>
             <stringProp name="50826">390</stringProp>
             <stringProp name="0"></stringProp>
           </collectionProp>
-          <collectionProp name="-1338220660">
+          <collectionProp name="-1225398627">
             <stringProp name="1567">10</stringProp>
-            <stringProp name="1509531">1260</stringProp>
+            <stringProp name="1515390">1890</stringProp>
             <stringProp name="30">30</stringProp>
             <stringProp name="48873">180</stringProp>
             <stringProp name="0"></stringProp>
@@ -129,7 +150,11 @@
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
       </kg.apc.jmeter.threads.UltimateThreadGroup>
       <hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /owners" enabled="true">
+        <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Think Time. ms">
+          <stringProp name="ConstantTimer.delay">${__P(think,500)}</stringProp>
+        </ConstantTimer>
+        <hashTree/>
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /owners">
           <stringProp name="TestPlan.comments">Find owners by last name</stringProp>
           <stringProp name="HTTPSampler.domain">${host}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
@@ -144,10 +169,6 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Think time, ms" enabled="true">
-            <stringProp name="ConstantTimer.delay">500</stringProp>
-          </ConstantTimer>
-          <hashTree/>
           <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="49586">200</stringProp>
@@ -160,7 +181,7 @@
           </ResponseAssertion>
           <hashTree/>
         </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /owners/${ownerId}" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /owners/${ownerId}">
           <stringProp name="TestPlan.comments">View owner</stringProp>
           <stringProp name="HTTPSampler.domain">${host}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
@@ -175,10 +196,6 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Think time, ms" enabled="true">
-            <stringProp name="ConstantTimer.delay">500</stringProp>
-          </ConstantTimer>
-          <hashTree/>
           <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="49586">200</stringProp>
@@ -191,7 +208,7 @@
           </ResponseAssertion>
           <hashTree/>
         </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /vets.html" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="GET /vets.html">
           <stringProp name="TestPlan.comments">List veterinarians</stringProp>
           <stringProp name="HTTPSampler.domain">${host}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
@@ -206,10 +223,6 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Think time, ms" enabled="true">
-            <stringProp name="ConstantTimer.delay">500</stringProp>
-          </ConstantTimer>
-          <hashTree/>
           <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="49586">200</stringProp>
@@ -222,7 +235,7 @@
           </ResponseAssertion>
           <hashTree/>
         </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /owners/new" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /owners/new">
           <stringProp name="TestPlan.comments">Create owner</stringProp>
           <stringProp name="HTTPSampler.domain">${host}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
@@ -273,11 +286,7 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Think time, ms" enabled="true">
-            <stringProp name="ConstantTimer.delay">500</stringProp>
-          </ConstantTimer>
-          <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="2102363903">Owner Information</stringProp>
             </collectionProp>
@@ -289,7 +298,7 @@
           </ResponseAssertion>
           <hashTree/>
         </hashTree>
-        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /owners/${visitOwnerId}/pets/${petId}/visits/new" enabled="true">
+        <HTTPSamplerProxy guiclass="HttpTestSampleGui" testclass="HTTPSamplerProxy" testname="POST /owners/${visitOwnerId}/pets/${petId}/visits/new">
           <stringProp name="TestPlan.comments">Add visit</stringProp>
           <stringProp name="HTTPSampler.domain">${host}</stringProp>
           <stringProp name="HTTPSampler.port">${port}</stringProp>
@@ -303,7 +312,7 @@
             <collectionProp name="Arguments.arguments">
               <elementProp name="date" elementType="HTTPArgument">
                 <boolProp name="HTTPArgument.always_encode">true</boolProp>
-                <stringProp name="Argument.value">${__RandomDate(yyyy-MM-dd,${tomorrow},2026-12-31,,)}</stringProp>
+                <stringProp name="Argument.value">${__RandomDate(yyyy-MM-dd,${tomorrow},${__timeShift(yyyy-MM-dd,,P365D,,)},,)}</stringProp>
                 <stringProp name="Argument.metadata">=</stringProp>
                 <boolProp name="HTTPArgument.use_equals">true</boolProp>
                 <stringProp name="Argument.name">date</stringProp>
@@ -319,11 +328,7 @@
           </elementProp>
         </HTTPSamplerProxy>
         <hashTree>
-          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Think time, ms" enabled="true">
-            <stringProp name="ConstantTimer.delay">500</stringProp>
-          </ConstantTimer>
-          <hashTree/>
-          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion">
+          <ResponseAssertion guiclass="AssertionGui" testclass="ResponseAssertion" testname="Response Assertion" enabled="true">
             <collectionProp name="Asserion.test_strings">
               <stringProp name="2102363903">Owner Information</stringProp>
             </collectionProp>

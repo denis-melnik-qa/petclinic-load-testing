@@ -1,0 +1,6 @@
+request                            count   avg_ms   p95_ms   max_ms   err_%
+GET_/owners                        20080      549     1176     9736    0.00
+GET_/owners/{id}                   20080      174      465     8430    0.00
+GET_/vets.html                     20079      126      395     8617    0.00
+POST_/owners/new                   20078      332      742     8695    0.00
+POST_/owners/{id}/pets/{id}/visits/new   20081      371      822     8899    0.00

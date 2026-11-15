@@ -8,10 +8,10 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U petclinic"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+      test: ["CMD-SHELL", "pg_isready -t 10 -U petclinic"]
+      interval: 10s
+      timeout: 15s
+      retries: 5
     mem_limit: 384m
 
   app:

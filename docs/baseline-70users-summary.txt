@@ -1,0 +1,2 @@
+step  users     req/s   avg_ms   p95_ms   p99_ms   err_%
+1     70        167.4      310      851     1304    0.00
