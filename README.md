@@ -40,5 +40,3 @@ Within this confirmation run, the slowest request is the search by last name (GE
 - Bottleneck: the application and the database together consume about 180% of the 2 CPU cores available to Docker, starting from 40 users. This is a combined figure (app + DB), observed in Grafana, not a JMeter metric. The limit is therefore the CPU of the whole host.
 - Slowest request: the search by last name (GET /owners).
 - req/s are JMeter counts. The server sees about 1.4× more requests because of redirects after POST. This explains the difference from Grafana's request rate (157 * 1.4 ≈ 220).
-
-**Notes:** req/s are JMeter counts (the server sees about 1.4x more requests because of redirects after POST). Everything (application, database, monitoring and the load generator) runs on one machine with 6 GB RAM, so absolute numbers are not representative of production hardware; the project demonstrates the methodology. Maximum response times of 7-11 s in the raw data are one-off stalls of the whole host, so percentiles are used instead.
