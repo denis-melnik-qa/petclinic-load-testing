@@ -40,3 +40,23 @@ Within this confirmation run, the slowest request is the search by last name (GE
 - Bottleneck: the application and the database together consume about 180% of the 2 CPU cores available to Docker, starting from 40 users. This is a combined figure (app + DB), observed in Grafana, not a JMeter metric. The limit is therefore the CPU of the whole host.
 - Slowest request: the search by last name (GET /owners).
 - req/s are JMeter counts. The server sees about 1.4× more requests because of redirects after POST. This explains the difference from Grafana's request rate (157 * 1.4 ≈ 220).
+
+## Stability (soak) test
+
+**Goal:** check that the system keeps steady response times and does not leak resources under a constant load below the maximum.
+
+**Load:** 56 users (80% of the 70-user maximum), 2 hours, 60s ramp-up, 100 ms think time. Same scenario as in the capacity test. Before the run the test data was removed and the application was warmed up.
+
+**Data growth:** test data was deliberately not cleaned during the run, so the database grew (see below). To separate a resource problem from an effect of data growth, `GET /vets.html` is used as a control request: it does not depend on the size of the `owners` table.
+
+**Acceptance criteria (defined before the run):**
+1. Errors < 1%.
+2. No container restarts or OOM kills.
+3. Control request (`GET /vets.html`): p95 of the last 30 minutes within 15% of
+   the first 30 minutes.
+4. JVM heap minimums and the HikariCP `pending` metric do not grow over time.
+5. Growth of data-dependent requests (`GET /owners`, POST requests) is
+   reported, but is not an acceptance criterion.
+
+**Monitored:** Grafana (response time, JVM heap, HikariCP pool, PostgreSQL
+connections), container CPU and memory every 30s, table sizes every 10 minutes.
