@@ -1,0 +1,188 @@
+# Index experiment — raw summaries
+# Generated: 2026-11-20T03:56:32+07:00
+# BEFORE = results/soak-20261119-1928   (no idx_owners_last_name_pattern, 56 users, ~2h)
+# AFTER  = results/soak3-20261120-0056    (with idx_owners_last_name_pattern, 56 users, ~2h)
+# JMeter scenario: jmeter/petclinic.jmx, think=100ms, browser closed
+# pg_stat_statements enabled and reset before each run
+
+## ===== BEFORE (no index) — results/soak-20261119-1928 =====
+
+### soak_clean.jtl — first 30 min (summarize_labels.sh 60 1860)
+request                            count   avg_ms   p95_ms   max_ms   err_%
+GET_/owners                        62255      372      783     2041    0.00
+GET_/owners/{id}                   62267      118      301     1083    0.00
+GET_/vets.html                     62250       81      251     1218    0.00
+POST_/owners/new                   62256      248      501     1996    0.00
+POST_/owners/{id}/pets/{id}/visits/new   62254      279      553     1670    0.00
+
+### soak_clean.jtl — last ~32 min (summarize_labels.sh 5400 7300)
+request                            count   avg_ms   p95_ms   max_ms   err_%
+GET_/owners                        46505      456      792     6640    0.00
+GET_/owners/{id}                   46509      241      524     4881    0.00
+GET_/vets.html                     46505       45      125      952    0.00
+POST_/owners/new                   46505      445      798     6258    0.00
+POST_/owners/{id}/pets/{id}/visits/new   46512      533      931     7013    0.00
+
+### soak_clean.jtl — 10-min windows (summarize_windows.sh 600 60)
+step  users     req/s   avg_ms   p95_ms   p99_ms   err_%
+1     56        167.4      230      606      879    0.00
+2     56        176.9      212      542      781    0.00
+3     56        174.2      217      550      809    0.00
+4     56        168.9      227      571      817    0.00
+5     56        166.3      233      573      820    0.00
+6     56        145.9      280      656      894    0.00
+7     56        142.1      290      657      862    0.00
+8     56        138.9      299      673      882    0.00
+9     56        135.9      308      685      883    0.00
+10    56        124.7      345      780     1154    0.00
+11    56        127.3      336      752     1003    0.00
+12    56        122.8      352      789     1008    0.00
+
+### pg_stat_statements — end-of-run totals
+=== 21:46:59 end ===
+                                 query                                  |  calls  | total_ms | mean_ms |    hit    | read 
+------------------------------------------------------------------------+---------+----------+---------+-----------+------
+ select count(o1_0.id) from owners o1_0 where o1_0.last_name like $1 es |  213997 | 14217447 |   66.44 | 457483289 |    0
+ select o1_0.id,o1_0.address,o1_0.city,o1_0.first_name,o1_0.last_name,o |  216136 |   484000 |    2.24 |  14429265 |    0
+ select o1_0.id,o1_0.address,o1_0.city,o1_0.first_name,o1_0.last_name,o | 1731786 |   109741 |    0.06 |  13423327 |  632
+ select v1_0.pet_id,v1_0.id,v1_0.visit_date,v1_0.description from visit | 1299616 |    97635 |    0.08 |  25635616 |  844
+ update visits set pet_id=$1 where id=$2                                |  215951 |    28272 |    0.13 |   4275807 |  272
+ insert into owners (address,city,first_name,last_name,telephone) value |  215965 |    21188 |    0.10 |   1331924 | 1667
+ select v1_0.pet_id,v1_0.id,v1_0.visit_date,v1_0.description from visit |  216376 |    19547 |    0.09 |   6390960 |   78
+ select p1_0.owner_id,p1_0.id,p1_0.birth_date,p1_0.name,t1_0.id,t1_0.na |  214234 |    18548 |    0.09 |   3362354 |   30
+(8 rows)
+
+
+### db-growth.log
+time | label | owners | visits | owners_size | visits_size | db_size
+19:28:11 | before | 100010 | 200005 | 25 MB | 33 MB | 87 MB
+19:30:25 | during | 100010 | 200005 | 25 MB | 33 MB | 87 MB
+19:40:29 | during | 117101 | 217080 | 27 MB | 34 MB | 90 MB
+19:50:32 | during | 138379 | 238365 | 28 MB | 35 MB | 92 MB
+20:00:34 | during | 159387 | 259368 | 30 MB | 36 MB | 95 MB
+20:10:37 | during | 179973 | 279956 | 32 MB | 37 MB | 98 MB
+20:20:39 | during | 200045 | 300024 | 33 MB | 38 MB | 101 MB
+20:30:44 | during | 218131 | 318115 | 35 MB | 39 MB | 103 MB
+20:40:46 | during | 235259 | 335234 | 36 MB | 40 MB | 105 MB
+20:50:49 | during | 252055 | 352033 | 38 MB | 41 MB | 108 MB
+21:00:53 | during | 268482 | 368466 | 39 MB | 42 MB | 110 MB
+21:10:56 | during | 283743 | 383717 | 40 MB | 43 MB | 112 MB
+21:21:01 | during | 299111 | 399088 | 42 MB | 44 MB | 114 MB
+21:31:05 | during | 313968 | 413947 | 43 MB | 45 MB | 116 MB
+21:42:09 | during | 315975 | 415956 | 43 MB | 45 MB | 117 MB
+21:47:00 | end | 315975 | 415956 | 43 MB | 45 MB | 117 MB
+
+### pg-counters.csv — per-10-min deltas
+min   10  hit_ratio 0.9999  reads/s      4  commits/s    373  ckpt_timed +2  ckpt_req +0  backend_writes +313  dead_tuples 17003
+min   20  hit_ratio 0.9999  reads/s      3  commits/s    465  ckpt_timed +2  ckpt_req +0  backend_writes +366  dead_tuples 38296
+min   30  hit_ratio 1.0000  reads/s      3  commits/s    460  ckpt_timed +2  ckpt_req +0  backend_writes +351  dead_tuples 10857
+min   40  hit_ratio 1.0000  reads/s      0  commits/s    451  ckpt_timed +2  ckpt_req +0  backend_writes +360  dead_tuples 31450
+min   50  hit_ratio 1.0000  reads/s      0  commits/s    439  ckpt_timed +2  ckpt_req +0  backend_writes +350  dead_tuples 51517
+min   60  hit_ratio 1.0000  reads/s      2  commits/s    438  ckpt_timed +2  ckpt_req +0  backend_writes +296  dead_tuples 11049
+min   70  hit_ratio 1.0000  reads/s      0  commits/s    432  ckpt_timed +2  ckpt_req +0  backend_writes +304  dead_tuples 28187
+min   80  hit_ratio 1.0000  reads/s      0  commits/s    423  ckpt_timed +2  ckpt_req +0  backend_writes +286  dead_tuples 45005
+min   90  hit_ratio 1.0000  reads/s      0  commits/s    414  ckpt_timed +2  ckpt_req +0  backend_writes +312  dead_tuples 61415
+min  100  hit_ratio 1.0000  reads/s      2  commits/s    384  ckpt_timed +2  ckpt_req +0  backend_writes +281  dead_tuples 798
+min  111  hit_ratio 1.0000  reads/s      0  commits/s    390  ckpt_timed +2  ckpt_req +0  backend_writes +253  dead_tuples 16166
+min  121  hit_ratio 1.0000  reads/s      0  commits/s    404  ckpt_timed +2  ckpt_req +0  backend_writes +249  dead_tuples 31041
+min  132  hit_ratio 1.0000  reads/s      0  commits/s     56  ckpt_timed +2  ckpt_req +0  backend_writes +38  dead_tuples 33101
+min  137  hit_ratio 1.0000  reads/s      0  commits/s      6  ckpt_timed +1  ckpt_req +0  backend_writes +0  dead_tuples 33101
+
+### docker-stats.csv — min/max per container (cpu%, mem MiB used)
+container                                samples  cpu_min  cpu_max    mem_min    mem_max
+petclinic-load-testing-app-1                243     0.12    99.69      311.7      560.9
+petclinic-load-testing-prometheus-1         243     0.18     1.99       31.8       63.2
+petclinic-load-testing-postgres-exporter-1    243     0.00     3.65       10.0       10.0
+petclinic-load-testing-postgres-1           243     0.00    99.93      106.6       97.6
+petclinic-load-testing-grafana-1            243     0.52     7.13      329.1      356.6
+
+## ===== AFTER (with index) — results/soak3-20261120-0056 =====
+
+### soak_clean.jtl — first 30 min (summarize_labels.sh 60 1860)
+request                            count   avg_ms   p95_ms   max_ms   err_%
+GET_/owners                        76082      248      520     6239    0.00
+GET_/owners/{id}                   76077       80      218     3016    0.00
+GET_/vets.html                     76079       56      170     4645    0.00
+POST_/owners/new                   76082      201      419     3460    0.00
+POST_/owners/{id}/pets/{id}/visits/new   76085      217      444     6054    0.00
+
+### soak_clean.jtl — last ~32 min (summarize_labels.sh 5400 7300)
+request                            count   avg_ms   p95_ms   max_ms   err_%
+GET_/owners                        77436      247      523     1806    0.00
+GET_/owners/{id}                   77415       82      222     2064    0.00
+GET_/vets.html                     77419       53      166      862    0.00
+POST_/owners/new                   77411      209      427     2852    0.00
+POST_/owners/{id}/pets/{id}/visits/new   77424      232      465     1995    0.00
+
+### soak_clean.jtl — 10-min windows (summarize_windows.sh 600 60)
+step  users     req/s   avg_ms   p95_ms   p99_ms   err_%
+1     56        206.5      167      427      747    0.00
+2     56        212.3      159      408      609    0.00
+3     56        215.2      156      402      567    0.00
+4     56        205.7      168      446      659    0.00
+5     56        213.5      158      408      571    0.00
+6     56        208.8      164      422      591    0.00
+7     56        209.4      163      424      597    0.00
+8     56        211.3      161      415      589    0.00
+9     56        207.5      165      422      612    0.00
+10    56        207.6      165      429      611    0.00
+11    56        209.5      163      414      586    0.00
+12    56        206.8      166      433      607    0.00
+
+### pg_stat_statements — end-of-run totals
+=== 03:05:46 end ===
+                                 query                                  |  calls  | total_ms | mean_ms |   hit    | read 
+------------------------------------------------------------------------+---------+----------+---------+----------+------
+ select v1_0.pet_id,v1_0.id,v1_0.visit_date,v1_0.description from visit | 1821378 |   124587 |    0.07 | 46718765 |    0
+ select o1_0.id,o1_0.address,o1_0.city,o1_0.first_name,o1_0.last_name,o | 2427172 |   112725 |    0.05 | 18814065 |    0
+ select count(o1_0.id) from owners o1_0 where o1_0.last_name like $1 es |  299769 |    42864 |    0.14 | 32419770 |    9
+ insert into owners (address,city,first_name,last_name,telephone) value |  302729 |    41632 |    0.14 |  2738869 |   14
+ update visits set pet_id=$1 where id=$2                                |  302724 |    25692 |    0.08 |  5987752 |    0
+ insert into visits (visit_date,description) values ($1,$2) RETURNING * |  302724 |    22953 |    0.08 |  2177380 |    0
+ select v1_0.pet_id,v1_0.id,v1_0.visit_date,v1_0.description from visit |  303105 |    20248 |    0.07 |  9567726 |    0
+ select p1_0.owner_id,p1_0.id,p1_0.birth_date,p1_0.name,t1_0.id,t1_0.na |  300102 |    19896 |    0.07 |  4709691 |  217
+(8 rows)
+
+
+### db-growth.log
+time | label | owners | visits | owners_size | visits_size | db_size
+00:58:29 | start | 100010 | 200005 | 27 MB | 33 MB | 89 MB
+00:59:35 | during | 100010 | 200005 | 27 MB | 33 MB | 89 MB
+01:09:39 | during | 123336 | 223321 | 30 MB | 34 MB | 93 MB
+01:19:41 | during | 148725 | 248704 | 32 MB | 36 MB | 97 MB
+01:29:44 | during | 174637 | 274610 | 35 MB | 37 MB | 101 MB
+01:39:46 | during | 199531 | 299517 | 38 MB | 39 MB | 106 MB
+01:49:49 | during | 225310 | 325297 | 41 MB | 40 MB | 110 MB
+01:59:51 | during | 250504 | 350491 | 44 MB | 41 MB | 115 MB
+02:09:54 | during | 274778 | 374761 | 47 MB | 43 MB | 119 MB
+02:19:58 | during | 300257 | 400231 | 50 MB | 44 MB | 123 MB
+02:30:00 | during | 325288 | 425274 | 53 MB | 45 MB | 127 MB
+02:40:04 | during | 350213 | 450199 | 57 MB | 47 MB | 133 MB
+02:50:06 | during | 375506 | 475491 | 62 MB | 50 MB | 141 MB
+03:00:09 | during | 400475 | 500463 | 66 MB | 52 MB | 148 MB
+03:05:48 | end | 402739 | 502729 | 67 MB | 53 MB | 148 MB
+
+### pg-counters.csv — per-10-min deltas
+min    1  hit_ratio 1.0000  reads/s      0  commits/s      6  ckpt_timed +0  ckpt_req +0  backend_writes +0  dead_tuples 0
+min   11  hit_ratio 1.0000  reads/s      0  commits/s    509  ckpt_timed +2  ckpt_req +0  backend_writes +542  dead_tuples 23234
+min   21  hit_ratio 1.0000  reads/s      1  commits/s    554  ckpt_timed +2  ckpt_req +0  backend_writes +460  dead_tuples 180
+min   31  hit_ratio 1.0000  reads/s      0  commits/s    565  ckpt_timed +2  ckpt_req +0  backend_writes +570  dead_tuples 26054
+min   41  hit_ratio 1.0000  reads/s      0  commits/s    544  ckpt_timed +2  ckpt_req +0  backend_writes +564  dead_tuples 50961
+min   51  hit_ratio 1.0000  reads/s      1  commits/s    563  ckpt_timed +2  ckpt_req +0  backend_writes +537  dead_tuples 13266
+min   61  hit_ratio 1.0000  reads/s      0  commits/s    549  ckpt_timed +2  ckpt_req +0  backend_writes +606  dead_tuples 38455
+min   71  hit_ratio 1.0000  reads/s      0  commits/s    530  ckpt_timed +2  ckpt_req +0  backend_writes +548  dead_tuples 62723
+min   81  hit_ratio 1.0000  reads/s      1  commits/s    555  ckpt_timed +2  ckpt_req +0  backend_writes +518  dead_tuples 10839
+min   92  hit_ratio 1.0000  reads/s      0  commits/s    545  ckpt_timed +2  ckpt_req +0  backend_writes +528  dead_tuples 35955
+min  102  hit_ratio 1.0000  reads/s      0  commits/s    543  ckpt_timed +2  ckpt_req +0  backend_writes +760  dead_tuples 60841
+min  112  hit_ratio 1.0000  reads/s      0  commits/s    553  ckpt_timed +2  ckpt_req +0  backend_writes +1010  dead_tuples 86151
+min  122  hit_ratio 1.0000  reads/s      1  commits/s    544  ckpt_timed +2  ckpt_req +0  backend_writes +861  dead_tuples 15965
+min  127  hit_ratio 0.9999  reads/s      0  commits/s     96  ckpt_timed +1  ckpt_req +0  backend_writes +78  dead_tuples 18293
+
+### docker-stats.csv — min/max per container (cpu%, mem MiB used)
+container                                samples  cpu_min  cpu_max    mem_min    mem_max
+petclinic-load-testing-app-1                227     0.12    98.29      565.6      609.0
+petclinic-load-testing-prometheus-1         227     0.19     3.04       66.9       88.7
+petclinic-load-testing-postgres-exporter-1    227     0.00     7.02       10.8       14.3
+petclinic-load-testing-postgres-1           227     0.09     8.72      205.7      250.0
+petclinic-load-testing-grafana-1            227     0.60     7.45      333.3      363.0
+

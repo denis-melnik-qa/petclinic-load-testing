@@ -1,0 +1,61 @@
+# Index experiment — raw summaries
+# Generated: 2026-11-20T00:49:02+07:00
+# Data set: ~100k owners (after cleanup.sh)
+# Both runs: 70 users, ramp-up 60s, duration 660s, think 100ms, browser closed
+# pg_stat_statements enabled and reset before each run
+
+## ===== BEFORE (no index) — results/idx-before-20261119-2333 =====
+
+### summarize_labels.sh
+request                            count   avg_ms   p95_ms   max_ms   err_%
+GET_/owners                        22631      475     1012     2562    0.00
+GET_/owners/{id}                   22621      148      383     1239    0.00
+GET_/vets.html                     22632      106      339     1337    0.00
+POST_/owners/new                   22630      285      584     1440    0.00
+POST_/owners/{id}/pets/{id}/visits/new   22628      320      660     1481    0.00
+
+### summarize_windows.sh
+step  users     req/s   avg_ms   p95_ms   p99_ms   err_%
+1     70        188.9      267      710     1032    0.00
+
+### pg_stat_statements (top-12)
+                                 query                                  | calls  | total_ms | mean_ms |   hit    | read 
+------------------------------------------------------------------------+--------+----------+---------+----------+------
+ select count(o1_0.id) from owners o1_0 where o1_0.last_name like $1 es |  24187 |   530717 |   21.94 | 27763853 |    0
+ select o1_0.id,o1_0.address,o1_0.city,o1_0.first_name,o1_0.last_name,o |  24429 |    31912 |    1.31 |  1392109 |    0
+ select o1_0.id,o1_0.address,o1_0.city,o1_0.first_name,o1_0.last_name,o | 195470 |     9810 |    0.05 |  1515182 |    0
+ select v1_0.pet_id,v1_0.id,v1_0.visit_date,v1_0.description from visit | 146676 |     4367 |    0.03 |   977455 |    0
+ update visits set pet_id=$1 where id=$2                                |  24368 |     2090 |    0.09 |   482324 |    0
+ select p1_0.owner_id,p1_0.id,p1_0.birth_date,p1_0.name,t1_0.id,t1_0.na |  24214 |     1782 |    0.07 |   380049 |    0
+ insert into owners (address,city,first_name,last_name,telephone) value |  24383 |     1747 |    0.07 |   150716 |    0
+ BEGIN READ ONLY                                                        | 171102 |     1587 |    0.01 |        0 |    0
+(8 rows)
+
+
+## ===== AFTER (with index) — results/idx-after-20261120-0018 =====
+
+### summarize_labels.sh
+request                            count   avg_ms   p95_ms   max_ms   err_%
+GET_/owners                        27142      342      720     2974    0.00
+GET_/owners/{id}                   27133      111      290     1649    0.00
+GET_/vets.html                     27134       85      262     1361    0.00
+POST_/owners/new                   27136      236      492     2217    0.00
+POST_/owners/{id}/pets/{id}/visits/new   27139      251      520     2331    0.00
+
+### summarize_windows.sh
+step  users     req/s   avg_ms   p95_ms   p99_ms   err_%
+1     70        226.4      205      534      799    0.00
+
+### pg_stat_statements (top-12)
+                                 query                                  | calls  | total_ms | mean_ms |   hit   | read 
+------------------------------------------------------------------------+--------+----------+---------+---------+------
+ select o1_0.id,o1_0.address,o1_0.city,o1_0.first_name,o1_0.last_name,o | 233180 |    10501 |    0.05 | 1807496 |    0
+ select v1_0.pet_id,v1_0.id,v1_0.visit_date,v1_0.description from visit | 174974 |     4556 |    0.03 | 1222485 |    0
+ select count(o1_0.id) from owners o1_0 where o1_0.last_name like $1 es |  28841 |     4069 |    0.14 | 3094394 |    7
+ insert into owners (address,city,first_name,last_name,telephone) value |  29086 |     2944 |    0.10 |  238406 |    0
+ select o1_0.id,o1_0.address,o1_0.city,o1_0.first_name,o1_0.last_name,o |  29130 |     2487 |    0.09 |  308350 |   80
+ insert into visits (visit_date,description) values ($1,$2) RETURNING * |  29073 |     2384 |    0.08 |  209334 |    0
+ update visits set pet_id=$1 where id=$2                                |  29073 |     2351 |    0.08 |  575953 |    0
+ select p1_0.owner_id,p1_0.id,p1_0.birth_date,p1_0.name,t1_0.id,t1_0.na |  28873 |     1826 |    0.06 |  453173 |    0
+(8 rows)
+

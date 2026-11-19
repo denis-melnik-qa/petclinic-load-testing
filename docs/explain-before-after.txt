@@ -1,0 +1,31 @@
+== WITH index (text_pattern_ops) ==
+                                                                   QUERY PLAN                                                                   
+------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=8.34..8.35 rows=1 width=8) (actual time=0.295..0.295 rows=1 loops=1)
+   Buffers: shared hit=105
+   ->  Index Scan using idx_owners_last_name_pattern on owners o  (cost=0.29..8.31 rows=11 width=4) (actual time=0.026..0.286 rows=106 loops=1)
+         Index Cond: ((last_name ~>=~ 'Lanris'::text) AND (last_name ~<~ 'Lanrit'::text))
+         Filter: (last_name ~~ 'Lanris%'::text)
+         Buffers: shared hit=105
+ Planning:
+   Buffers: shared hit=141
+ Planning Time: 0.444 ms
+ Execution Time: 0.355 ms
+(10 rows)
+
+
+== WITHOUT index ==
+                                                  QUERY PLAN                                                   
+---------------------------------------------------------------------------------------------------------------
+ Aggregate  (cost=2924.79..2924.80 rows=1 width=8) (actual time=12.522..12.523 rows=1 loops=1)
+   Buffers: shared hit=1318
+   ->  Seq Scan on owners o  (cost=0.00..2924.76 rows=11 width=4) (actual time=0.020..12.506 rows=106 loops=1)
+         Filter: (last_name ~~ 'Lanris%'::text)
+         Rows Removed by Filter: 128990
+         Buffers: shared hit=1318
+ Planning:
+   Buffers: shared hit=86 dirtied=1
+ Planning Time: 0.293 ms
+ Execution Time: 12.565 ms
+(10 rows)
+
