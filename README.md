@@ -85,7 +85,7 @@ See `db/indexes.sql`.
 
 **Comparison:** two ~2-hour soak runs at 56 users on the same starting data (about 100k owners / 200k visits after `db/cleanup.sh`), browser closed, cleaned and warmed up before each, `pg_stat_statements` reset before each. The "after" run faced a larger table (403k owners by the end vs 316k in the "before" run) and still did better.
 
-| | Without index | With index |
+| Parameter | Without index | With index |
 |---|---:|---:|
 | req/s, first 10-min window | 167.4 | 206.5 |
 | req/s, last 10-min window | 122.8 | 206.8 |
