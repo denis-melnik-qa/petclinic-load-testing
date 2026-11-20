@@ -60,3 +60,41 @@ Within this confirmation run, the slowest request is the search by last name (GE
 
 **Monitored:** Grafana (response time, JVM heap, HikariCP pool, PostgreSQL
 connections), container CPU and memory every 30s, table sizes every 10 minutes.
+
+## Index experiment (search by last name)
+
+**Why:** the soak test showed a steady degradation (throughput fell by about
+30% at constant load), and `pg_stat_statements` showed that one query, the
+count query of the owner search (`last_name LIKE 'prefix%'`), took about 90-95%
+of the database time and its cost grew with the table size (average 66 ms over
+the 2-hour run; about 2,100 buffer reads per call vs about 1,000 at the start).
+Cache hit ratio was ~100%, checkpoints were regular and autovacuum kept up,
+so memory and disk were ruled out.
+
+**Plan (before):** `Parallel Seq Scan on owners o` (cost=4900.73..4900.74 rows=1)
+(actual time=17.630..17.631 rows=1 loops=3), `Rows Removed by Filter: 105290`,
+`Buffers: shared hit=3252`, **Execution Time: 22.921 ms**.
+**Plan (after):** `Index Scan using idx_owners_last_name_pattern on owners o`
+(cost=0.42..8.44 rows=30) (actual time=0.044..0.313 rows=106 loops=1),
+`Index Cond: ((last_name ~>=~ 'Lanris') AND (last_name ~<~ 'Lanrit'))`,
+`Buffers: shared hit=103 read=3`, **Execution Time: 0.363 ms**.
+
+**Change:** `CREATE INDEX idx_owners_last_name_pattern ON owners (last_name text_pattern_ops);`
+(`text_pattern_ops` is needed for `LIKE 'prefix%'` unless the collation is "C".)
+See `db/indexes.sql`.
+
+**Comparison:** two ~2-hour soak runs at 56 users on the same starting data (about 100k owners / 200k visits after `db/cleanup.sh`), browser closed, cleaned and warmed up before each, `pg_stat_statements` reset before each. The "after" run faced a larger table (403k owners by the end vs 316k in the "before" run) and still did better.
+
+| | Without index | With index |
+|---|---:|---:|
+| req/s, first 10-min window | 167.4 | 206.5 |
+| req/s, last 10-min window | 122.8 | 206.8 |
+| avg, first → last, ms | 230 → 352 | 167 → 166 |
+| p95, first → last, ms | 606 → 789 | 427 → 433 |
+| p99, first → last, ms | 879 → 1154 | 747 → 607 |
+| GET /owners p95, ms (first → last) | 783 → 792 | 520 → 523 |
+| count query, mean ms | 66.44 | 0.14 |
+| count query, total DB time | 14 217 s | 42.9 s |
+| count query, buffers per call | ~2 138 | ~108 |
+
+**Caveats:** one run per variant (the run without the index went first), so the JMeter percentages are indicative; the database-side numbers are the main evidence. `GET /owners` is still the slowest request (avg 247 ms in the indexed soak) although the database now spends about 0.14 ms on it: the remaining time is most likely spent in the application and in waiting for CPU on the shared machine (hypothesis, not verified). The two soak runs are not perfectly matched — the "after" run lasted 127 min vs 139 min and the table grew further during it.
