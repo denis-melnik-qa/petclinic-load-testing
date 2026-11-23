@@ -1,3 +1,5 @@
+![Load test](https://github.com/denis-melnik-qa/petclinic-load-testing/actions/workflows/loadtest.yml/badge.svg)
+
 # PetClinic Load Testing
 
 Load testing project: Spring PetClinic + PostgreSQL in Docker, with JMeter, Prometheus and Grafana (work in progress).
