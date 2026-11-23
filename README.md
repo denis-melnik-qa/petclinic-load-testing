@@ -105,6 +105,6 @@ See `db/indexes.sql`.
 
 On every push to `main`, every pull request and on manual trigger, the workflow brings up the app and PostgreSQL with Docker Compose, loads the generated dataset and the index, warms up the app, runs a short JMeter smoke test (30 users, 30s ramp-up, 180s total, 100ms think time) and checks the acceptance criteria (p95 <= 1000ms, errors < 1%, first 30s excluded). The JMeter HTML report is uploaded as an artifact.
 
-[Latest run summary](https://github.com/denis-melnik-qa/petclinic-load-testing/actions/workflows/loadtest.yml)
+[Latest runs](https://github.com/denis-melnik-qa/petclinic-load-testing/actions/workflows/loadtest.yml)
 
 This is a smoke test, not a capacity measurement: the runner has different hardware, and JMeter shares it with the system under test. Do not compare these numbers with the local capacity results.
