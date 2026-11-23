@@ -13,7 +13,7 @@ jobs:
     env:
       JMETER_VERSION: 5.6.3
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Start app and database
         run: docker compose up -d --build app postgres
@@ -47,7 +47,7 @@ jobs:
       - name: Run test (30 users, 3 min)
         run: |
           mkdir -p results
-          $JMETER -n -t jmeter/petclinic.jmx -l results/ci.jtl -e -o results/report \
+          HEAP="-Xms256m -Xmx3g" $JMETER -n -t jmeter/petclinic.jmx -l results/ci.jtl -e -o results/report \
             -Jthreads=30 -Jrampup=30 -Jduration=180 -Jthink=100 -Jhost=localhost -Jport=8080
 
       - name: Check acceptance criteria
@@ -55,7 +55,7 @@ jobs:
 
       - name: Upload report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: jmeter-report
           path: results/
