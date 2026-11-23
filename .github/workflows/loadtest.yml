@@ -47,11 +47,17 @@ jobs:
       - name: Run test (30 users, 3 min)
         run: |
           mkdir -p results
-          HEAP="-Xms256m -Xmx3g" $JMETER -n -t jmeter/petclinic.jmx -l results/ci.jtl -e -o results/report \
+          $JMETER -n -t jmeter/petclinic.jmx -l results/ci.jtl \
             -Jthreads=30 -Jrampup=30 -Jduration=180 -Jthink=100 -Jhost=localhost -Jport=8080
 
       - name: Check acceptance criteria
         run: jmeter/check_results.sh results/ci.jtl 1000 1 30
+
+      - name: Per-request summary
+        if: always()
+        run: |
+          jmeter/summarize_norm.sh results/ci.jtl 150 30 | tee results/summary.txt
+          { echo '```'; cat results/summary.txt; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload report
         if: always()
