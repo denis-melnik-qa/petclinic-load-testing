@@ -1,0 +1,61 @@
+name: Load test (smoke)
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  loadtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      JMETER_VERSION: 5.6.3
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start app and database
+        run: docker compose up -d --build app postgres
+
+      - name: Wait for app
+        run: |
+          for i in $(seq 1 90); do
+            curl -sf http://localhost:8080/vets.html >/dev/null && exit 0
+            sleep 5
+          done
+          docker compose logs app | tail -100
+          exit 1
+
+      - name: Load test data and index
+        run: |
+          docker compose exec -T postgres psql -U petclinic -d petclinic -v ON_ERROR_STOP=1 < db/generate_data.sql
+          docker compose exec -T postgres psql -U petclinic -d petclinic -v ON_ERROR_STOP=1 < db/indexes.sql
+          docker compose exec -T postgres psql -U petclinic -d petclinic -c "ANALYZE;"
+
+      - name: Install JMeter
+        run: |
+          curl -sSL https://archive.apache.org/dist/jmeter/binaries/apache-jmeter-${JMETER_VERSION}.tgz | tar xz -C "$HOME"
+          echo "JMETER=$HOME/apache-jmeter-${JMETER_VERSION}/bin/jmeter" >> "$GITHUB_ENV"
+
+      - name: Warm up
+        run: |
+          chmod +x jmeter/*.sh
+          jmeter/warmup.sh
+          sleep 60
+
+      - name: Run test (30 users, 3 min)
+        run: |
+          mkdir -p results
+          $JMETER -n -t jmeter/petclinic.jmx -l results/ci.jtl -e -o results/report \
+            -Jthreads=30 -Jrampup=30 -Jduration=180 -Jthink=100 -Jhost=localhost -Jport=8080
+
+      - name: Check acceptance criteria
+        run: jmeter/check_results.sh results/ci.jtl 1000 1 30
+
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jmeter-report
+          path: results/
