@@ -89,15 +89,15 @@ See `db/indexes.sql`.
 |---|---:|---:|
 | req/s, first 10-min window | 167.4 | 206.5 |
 | req/s, last 10-min window | 122.8 | 206.8 |
-| avg, first → last, ms | 230 → 352 | 167 → 166 |
-| p95, first → last, ms | 606 → 789 | 427 → 433 |
-| p99, first → last, ms | 879 → 1154 | 747 → 607 |
-| GET /owners p95, ms (first → last) | 783 → 792 | 520 → 523 |
+| avg, first => last, ms | 230 => 352 | 167 => 166 |
+| p95, first => last, ms | 606 => 789 | 427 => 433 |
+| p99, first => last, ms | 879 => 1154 | 747 => 607 |
+| GET /owners p95, ms (first => last) | 783 => 792 | 520 => 523 |
 | count query, mean ms | 66.44 | 0.14 |
 | count query, total DB time | 14 217 s | 42.9 s |
 | count query, buffers per call | ~2 138 | ~108 |
 
-**Caveats:** one run per variant (the run without the index went first), so the JMeter percentages are indicative; the database-side numbers are the main evidence. `GET /owners` is still the slowest request (avg 247ms in the indexed soak) although the database now spends about 0.14 ms on it: the remaining time is most likely spent in the application and in waiting for CPU on the shared machine (hypothesis, not verified). The two soak runs are not perfectly matched — the "after" run lasted 127 min vs 139 min and the table grew further during it.
+**Caveats:** one run per variant (the run without the index went first), so the JMeter percentages are indicative; the database-side numbers are the main evidence. `GET /owners` is still the slowest request (avg 247ms in the indexed soak) although the database now spends about 0.14 ms on it: the remaining time is most likely spent in the application and in waiting for CPU on the shared machine (hypothesis, not verified). The two soak runs are not perfectly matched - the "after" run lasted 127 min vs 139 min and the table grew further during it.
 
 ## CI (GitHub Actions)
 
