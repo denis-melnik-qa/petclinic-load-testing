@@ -1,5 +1,3 @@
-![Load test](https://github.com/denis-melnik-qa/petclinic-load-testing/actions/workflows/loadtest.yml/badge.svg)
-
 # PetClinic Load Testing
 
 Load testing project: Spring PetClinic + PostgreSQL in Docker, with JMeter, Prometheus and Grafana (work in progress).
@@ -47,7 +45,7 @@ Within this confirmation run, the slowest request is the search by last name (GE
 
 **Goal:** check that the system keeps steady response times and does not leak resources under a constant load below the maximum.
 
-**Load:** 56 users (80% of the 70-user maximum), 2 hours, 60s ramp-up, 100 ms think time. Same scenario as in the capacity test. Before the run the test data was removed and the application was warmed up.
+**Load:** 56 users (80% of the 70-user maximum), 2 hours, 60s ramp-up, 100ms think time. Same scenario as in the capacity test. Before the run the test data was removed and the application was warmed up.
 
 **Data growth:** test data was deliberately not cleaned during the run, so the database grew (see below). To separate a resource problem from an effect of data growth, `GET /vets.html` is used as a control request: it does not depend on the size of the `owners` table.
 
@@ -99,4 +97,14 @@ See `db/indexes.sql`.
 | count query, total DB time | 14 217 s | 42.9 s |
 | count query, buffers per call | ~2 138 | ~108 |
 
-**Caveats:** one run per variant (the run without the index went first), so the JMeter percentages are indicative; the database-side numbers are the main evidence. `GET /owners` is still the slowest request (avg 247 ms in the indexed soak) although the database now spends about 0.14 ms on it: the remaining time is most likely spent in the application and in waiting for CPU on the shared machine (hypothesis, not verified). The two soak runs are not perfectly matched — the "after" run lasted 127 min vs 139 min and the table grew further during it.
+**Caveats:** one run per variant (the run without the index went first), so the JMeter percentages are indicative; the database-side numbers are the main evidence. `GET /owners` is still the slowest request (avg 247ms in the indexed soak) although the database now spends about 0.14 ms on it: the remaining time is most likely spent in the application and in waiting for CPU on the shared machine (hypothesis, not verified). The two soak runs are not perfectly matched — the "after" run lasted 127 min vs 139 min and the table grew further during it.
+
+## CI (GitHub Actions)
+
+![Load test](https://github.com/denis-melnik-qa/petclinic-load-testing/actions/workflows/loadtest.yml/badge.svg)
+
+On every push to `main`, every pull request and on manual trigger, the workflow brings up the app and PostgreSQL with Docker Compose, loads the generated dataset and the index, warms up the app, runs a short JMeter smoke test (30 users, 30s ramp-up, 180s total, 100ms think time) and checks the acceptance criteria (p95 <= 1000ms, errors < 1%, first 30s excluded). The JMeter HTML report is uploaded as an artifact.
+
+[Latest run summary](https://github.com/denis-melnik-qa/petclinic-load-testing/actions/workflows/loadtest.yml)
+
+This is a smoke test, not a capacity measurement: the runner has different hardware, and JMeter shares it with the system under test. Do not compare these numbers with the local capacity results.
