@@ -103,7 +103,7 @@ See `db/indexes.sql`.
 
 ![Load test](https://github.com/denis-melnik-qa/petclinic-load-testing/actions/workflows/loadtest.yml/badge.svg)
 
-On every push to `main`, every pull request and on manual trigger, the workflow brings up the app and PostgreSQL with Docker Compose, loads the generated dataset and the index, warms up the app, runs a short JMeter smoke test (30 users, 30s ramp-up, 180s total, 100ms think time) and checks the acceptance criteria (p95 <= 1000ms, errors < 1%, first 30s excluded). The JMeter HTML report is uploaded as an artifact.
+On every push to `main`, every pull request and on manual trigger, the workflow brings up the app and PostgreSQL with Docker Compose, loads the generated dataset and the index, warms up the app, runs a short JMeter smoke test (30 users, 30 s ramp-up, 180 s total, 100ms think time) and checks the acceptance criteria (p95 <= 1000ms, errors < 1%, first 30s excluded). The JMeter HTML report is uploaded as an artifact.
 
 [Latest runs](https://github.com/denis-melnik-qa/petclinic-load-testing/actions/workflows/loadtest.yml)
 
