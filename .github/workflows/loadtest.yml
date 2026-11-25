@@ -67,5 +67,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: jmeter-report
+          name: ci-results
           path: results/
