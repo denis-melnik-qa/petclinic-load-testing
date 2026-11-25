@@ -2,3 +2,4 @@ results/
 *.hprof
 *.jtl
 report/
+*.log
