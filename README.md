@@ -57,7 +57,6 @@ JMeter (on the host) --HTTP--> app :8080 --JDBC--> postgres
 `results/` and `*.jtl` are git-ignored.
 
 </details>
-
 <details>
 <summary><h2>How to run</h2></summary>
 
@@ -117,7 +116,6 @@ jmeter/summarize_labels.sh results/soak.jtl 0 1800        # first 30 minutes
 Optional recorders while a test runs: `jmeter/record_stats.sh out.csv`, `jmeter/pg_diagnostics.sh <label> <dir> <interval_s>`.
 
 </details>
-
 <details>
 <summary><h2>Methodology</h2></summary>
 
@@ -129,7 +127,6 @@ Optional recorders while a test runs: `jmeter/record_stats.sh out.csv`, `jmeter/
 - **Metrics:** JMeter results for response times; Prometheus/Grafana for JVM, HikariCP and PostgreSQL; `docker stats` and `pg_stat_statements` for resources and queries.
 
 </details>
-
 <details>
 <summary><h2>Capacity test (step load)</h2></summary>
 
@@ -166,9 +163,7 @@ Scenario `petclinic_capacity.jmx`: 10 steps from 10 to 100 users (+10 per step),
 ![Confirmation run at 70 users](docs/confirm/confirm_rps_avg_time.PNG)
 
 </details>
-
 </details>
-
 <details>
 <summary><h2>Stability (soak) test</h2></summary>
 
@@ -224,9 +219,7 @@ Scenario `petclinic_capacity.jmx`: 10 steps from 10 to 100 users (+10 per step),
 ![Soak with index: database](docs/soak/withIndexes/soak_wi_db.PNG)
 
 </details>
-
 </details>
-
 <details>
 <summary><h2>Index experiment (search by last name)</h2></summary>
 
@@ -260,7 +253,6 @@ A plain btree index `idx_owners_last_name` already existed; the planner still ch
 **Caveats:** one run per variant, and the run without the index went first, so the JMeter percentages are only a rough guide; the database-side numbers are the main evidence. `GET /owners` is still the slowest request (avg 247 ms in the indexed soak) although the database now spends about 0.14 ms on it. The remaining time is most likely spent in the application and in waiting for CPU on the shared machine (hypothesis, not verified). Both runs lasted 120 minutes, but the table grew differently during them. A shorter pair of 10-minute runs at 70 users is summarised in `docs/index-experiment_10min.txt`.
 
 </details>
-
 <details>
 <summary><h2>CI (GitHub Actions)</h2></summary>
 
@@ -282,7 +274,6 @@ On every push to `main` (changes to `*.md` files are ignored), every pull reques
 **Scope.** The CI run is a smoke test. It catches breakages and gross slowdowns, but not small regressions: the load is limited by the think time (about 240-280 req/s), the runner is shared, and JMeter runs on the same machine as the application. Two runs gave p95 of 14 ms and 66 ms, so the spread between runs is large. Do not compare these numbers with the local capacity results. There is **no JMeter HTML report** in CI: generating it ran out of memory (`OutOfMemoryError`) and the cause was not investigated. Prometheus and Grafana are not started in CI.
 
 </details>
-
 <details>
 <summary><h2>Limitations and caveats</h2></summary>
 
