@@ -222,7 +222,12 @@ Scenario `petclinic_capacity.jmx`: 10 steps from 10 to 100 users (+10 per step),
 </details>
 <details>
 <summary><h2>Index experiment (search by last name)</h2></summary>
-
+<details>
+<summary><h2>Test1</h2></summary>
+</details>
+<details>
+<summary><h2>Test2</h2></summary>
+</details>
 This was run as an experiment. The missing prefix index is a property of this lab setup, not a defect in PetClinic.
 
 **Why:** the soak test showed steady degradation (throughput down by about 27%, from 167 to 123 req/s, at constant load). `pg_stat_statements` showed that one query, the count query of the owner search (`last_name LIKE 'prefix%'`), took about 90-95% of the database time and its cost grew with the table (mean 66 ms over the run; about 2,100 buffer reads per call vs about 1,000 at the start). Cache hit ratio was about 100%, checkpoints were regular and autovacuum kept up, so memory and disk were ruled out.
