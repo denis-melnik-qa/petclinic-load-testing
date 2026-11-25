@@ -182,11 +182,11 @@ Scenario `petclinic_capacity.jmx`: 10 steps from 10 to 100 users (+10 per step),
 
 | # | Criterion | Without index | With index |
 |---|---|---|---|
-| 1 | Errors | 0 of 1,079,842, met | 0 of 1,513,703, met |
-| 2 | Restarts / OOM | none: app `resets` = 0, container logs checked, met | none, same checks, met |
-| 3 | `/vets.html` p95, first to last 30 min | 252 to 124 ms (no degradation), met | 169 to 165 ms, met |
-| 4 | Heap minimum per 30-min window, windows 2-4 | 116 / 107 / 108 MiB, met | 134 / 130 / 126 MiB, met |
-| 4 | HikariCP `pending`, mean per 30-min window | 11.7 / 13.9 / 20.3 / 26.3, **not met** | 11.0 / 14.6 / 14.8 / 14.9, plateau |
+| 1 | Errors | 0 of 1,079,842; met | 0 of 1,513,703; met |
+| 2 | Restarts / OOM | none: app `resets` = 0, container logs checked; met | none, same checks; met |
+| 3 | `/vets.html` p95, first to last 30 min | 252 to 124 ms (no degradation); met | 169 to 165 ms; met |
+| 4 | Heap minimum per 30-min window, windows 2-4 | 116 / 107 / 108 MiB; met | 134 / 130 / 126 MiB; met |
+| 4 | HikariCP `pending`, mean per 30-min window | 11.7 / 13.9 / 20.3 / 26.3; **not met** | 11.0 / 14.6 / 14.8 / 14.9; plateau |
 | 5 | `GET /owners` p95, first to last 30 min | 786 to 794 ms | 518 to 523 ms |
 | 5 | `GET /owners/{id}` p95 | 301 to 526 ms | 216 to 221 ms |
 | 5 | `POST` add visit p95 | 553 to 935 ms | 442 to 463 ms |
@@ -209,25 +209,10 @@ Scenario `petclinic_capacity.jmx`: 10 steps from 10 to 100 users (+10 per step),
 ![Soak without index: database](docs/soak/withoutIndexes/soak_woi_db.PNG)
 
 </details>
-
-<details>
-<summary>Grafana screenshots: soak with index</summary>
-
-![Soak with index: RPS and average response time](docs/soak/withIndexes/soak_wi_rps_avg.PNG)
-![Soak with index: p95 and 5xx](docs/soak/withIndexes/soak_wi_p95_5xx.PNG)
-![Soak with index: application](docs/soak/withIndexes/soak_wi_app.PNG)
-![Soak with index: database](docs/soak/withIndexes/soak_wi_db.PNG)
-
-</details>
 </details>
 <details>
 <summary><h2>Index experiment (search by last name)</h2></summary>
-<details>
-<summary><h2>Test1</h2></summary>
-</details>
-<details>
-<summary><h2>Test2</h2></summary>
-</details>
+
 This was run as an experiment. The missing prefix index is a property of this lab setup, not a defect in PetClinic.
 
 **Why:** the soak test showed steady degradation (throughput down by about 27%, from 167 to 123 req/s, at constant load). `pg_stat_statements` showed that one query, the count query of the owner search (`last_name LIKE 'prefix%'`), took about 90-95% of the database time and its cost grew with the table (mean 66 ms over the run; about 2,100 buffer reads per call vs about 1,000 at the start). Cache hit ratio was about 100%, checkpoints were regular and autovacuum kept up, so memory and disk were ruled out.
@@ -257,6 +242,15 @@ A plain btree index `idx_owners_last_name` already existed; the planner still ch
 
 **Caveats:** one run per variant, and the run without the index went first, so the JMeter percentages are only a rough guide; the database-side numbers are the main evidence. `GET /owners` is still the slowest request (avg 247 ms in the indexed soak) although the database now spends about 0.14 ms on it. The remaining time is most likely spent in the application and in waiting for CPU on the shared machine (hypothesis, not verified). Both runs lasted 120 minutes, but the table grew differently during them. A shorter pair of 10-minute runs at 70 users is summarised in `docs/index-experiment_10min.txt`.
 
+<details>
+<summary>Grafana screenshots: soak with index</summary>
+
+![Soak with index: RPS and average response time](docs/soak/withIndexes/soak_wi_rps_avg.PNG)
+![Soak with index: p95 and 5xx](docs/soak/withIndexes/soak_wi_p95_5xx.PNG)
+![Soak with index: application](docs/soak/withIndexes/soak_wi_app.PNG)
+![Soak with index: database](docs/soak/withIndexes/soak_wi_db.PNG)
+
+</details>
 </details>
 <details>
 <summary><h2>CI (GitHub Actions)</h2></summary>
@@ -295,10 +289,4 @@ On every push to `main` (changes to `*.md` files are ignored), every pull reques
 - CI: smoke test only, no HTML report (see above).
 - Think time: `petclinic_capacity.jmx` defaults to 500 ms; all results here were obtained with `-Jthink=100`.
 
-</details>
-<details>
-<summary><h2>Test1</h2></summary>
-</details>
-<details>
-<summary><h2>Test1</h2></summary>
 </details>
