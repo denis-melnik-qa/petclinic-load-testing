@@ -4,8 +4,6 @@
 
 A single-machine load-testing lab: Spring PetClinic + PostgreSQL in Docker Compose, tested with JMeter and monitored with Prometheus and Grafana. It contains a step-load capacity test, a 2-hour soak test, a before/after index experiment and a GitHub Actions smoke test.
 
-![Capacity test: requests per second and average response time](docs/capacity/capacity_rps_avg.PNG)
-
 ## Contents
 
 - [Goal](#goal)
@@ -161,10 +159,16 @@ Scenario `petclinic_capacity.jmx`: 10 steps from 10 to 100 users (+10 per step),
 - From about 40 users the application and the database together use about 180% CPU of the 2 cores available to Docker (Grafana observation, combined figure, not a JMeter metric). This points to CPU saturation of the whole host.
 - JMeter counts about 157 req/s; the server sees roughly 1.4x more requests because of redirects after POST, which explains the higher request rate in Grafana.
 
+<details>
+<summary>Grafana screenshots: capacity test and 70-user confirmation run</summary>
+
+![Capacity test: requests per second and average response time](docs/capacity/capacity_rps_avg.PNG)
 ![Capacity test: p95 and 5xx](docs/capacity/capacity_p95_5xx.PNG)
 ![Capacity test: application](docs/capacity/capacity_app.PNG)
 ![Capacity test: database](docs/capacity/capacity_db.PNG)
 ![Confirmation run at 70 users](docs/confirm/confirm_rps_avg_time.PNG)
+
+</details>
 
 ## Stability (soak) test
 
@@ -201,11 +205,25 @@ Scenario `petclinic_capacity.jmx`: 10 steps from 10 to 100 users (+10 per step),
 - Without the index, throughput stepped down at about 52 minutes (20:23 local time): requests per second fell from roughly 235 to 205. CPU of app + database stayed near 180% of 2 cores, but the database share grew (app about 106% to 91%, postgres about 71% to 89%, averages from `docker stats` samples) and the number of PostgreSQL connections started to fluctuate (11 to 18, before it was constant at 11). This matches the count query switching to a parallel sequential scan: at the current table size (about 403k owners) `EXPLAIN` without the index shows `Gather` with 2 planned workers. The switch itself was not confirmed.
 - Each run had one short stall (about 97 minutes in the first run, about 12 minutes in the second, approximate): roughly 50-130 requests took over 3 s, maximum 6-7 s, about one request per virtual user. GC pauses were at most 0.25 s, there was no restart, and checkpoints ran about every 5 minutes with `sync` of about 1 s or less, so none of these explains it. The cause was not identified.
 
+<details>
+<summary>Grafana screenshots: soak without index</summary>
+
 ![Soak without index: RPS and average response time](docs/soak/withoutIndexes/soak_woi_rps_avg.PNG)
 ![Soak without index: p95 and 5xx](docs/soak/withoutIndexes/soak_woi_p95_5xx.PNG)
-![Soak without index: database connections](docs/soak/withoutIndexes/soak_woi_db.PNG)
+![Soak without index: application](docs/soak/withoutIndexes/soak_woi_app.PNG)
+![Soak without index: database](docs/soak/withoutIndexes/soak_woi_db.PNG)
+
+</details>
+
+<details>
+<summary>Grafana screenshots: soak with index</summary>
+
 ![Soak with index: RPS and average response time](docs/soak/withIndexes/soak_wi_rps_avg.PNG)
 ![Soak with index: p95 and 5xx](docs/soak/withIndexes/soak_wi_p95_5xx.PNG)
+![Soak with index: application](docs/soak/withIndexes/soak_wi_app.PNG)
+![Soak with index: database](docs/soak/withIndexes/soak_wi_db.PNG)
+
+</details>
 
 ## Index experiment (search by last name)
 
