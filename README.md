@@ -4,24 +4,12 @@
 
 A single-machine load-testing lab: Spring PetClinic + PostgreSQL in Docker Compose, tested with JMeter and monitored with Prometheus and Grafana. It contains a step-load capacity test, a 2-hour soak test, a before/after index experiment and a GitHub Actions smoke test.
 
-## Contents
-
-- [Goal](#goal)
-- [Test bench](#test-bench)
-- [Repository layout](#repository-layout)
-- [How to run](#how-to-run)
-- [Methodology](#methodology)
-- [Capacity test](#capacity-test-step-load)
-- [Stability (soak) test](#stability-soak-test)
-- [Index experiment](#index-experiment-search-by-last-name)
-- [CI](#ci-github-actions)
-- [Limitations and caveats](#limitations-and-caveats)
-
 ## Goal
 
-To show a complete load-testing workflow: acceptance criteria defined before the run, warm-up and data cleanup before every test, a control request, and a before/after comparison with the evidence kept in the repository. The numbers illustrate the method; they are not absolute performance figures (see [Limitations](#limitations-and-caveats)).
+To show a complete load-testing workflow: acceptance criteria defined before the run, warm-up and data cleanup before every test, a control request, and a before/after comparison with the evidence kept in the repository. The numbers illustrate the method; they are not absolute performance figures (see Limitations and caveats below).
 
-## Test bench
+<details>
+<summary><h2>Test bench</h2></summary>
 
 ```
 JMeter (on the host) --HTTP--> app :8080 --JDBC--> postgres
@@ -45,7 +33,7 @@ JMeter (on the host) --HTTP--> app :8080 --JDBC--> postgres
 
 **Data** (`db/generate_data.sql`): about 100,000 owners, 100,000 pets, 200,000 visits, 909 distinct last names. The distribution of pets per owner was not analysed.
 
-## Repository layout
+### Repository layout
 
 | Path | Purpose |
 |---|---|
@@ -68,7 +56,10 @@ JMeter (on the host) --HTTP--> app :8080 --JDBC--> postgres
 
 `results/` and `*.jtl` are git-ignored.
 
-## How to run
+</details>
+
+<details>
+<summary><h2>How to run</h2></summary>
 
 ### Prerequisites
 
@@ -125,7 +116,10 @@ jmeter/summarize_labels.sh results/soak.jtl 0 1800        # first 30 minutes
 
 Optional recorders while a test runs: `jmeter/record_stats.sh out.csv`, `jmeter/pg_diagnostics.sh <label> <dir> <interval_s>`.
 
-## Methodology
+</details>
+
+<details>
+<summary><h2>Methodology</h2></summary>
 
 - **Acceptance criteria:** p95 response time <= 1000 ms and errors < 1%.
 - **Maximum load** is the last step that meets the criteria; the next step is the breaking point. The maximum is confirmed with a separate 10-minute run.
@@ -134,7 +128,10 @@ Optional recorders while a test runs: `jmeter/record_stats.sh out.csv`, `jmeter/
 - **Control request:** `GET /vets.html` does not depend on the size of the `owners` table, so it separates a resource problem from the effect of data growth.
 - **Metrics:** JMeter results for response times; Prometheus/Grafana for JVM, HikariCP and PostgreSQL; `docker stats` and `pg_stat_statements` for resources and queries.
 
-## Capacity test (step load)
+</details>
+
+<details>
+<summary><h2>Capacity test (step load)</h2></summary>
 
 Scenario `petclinic_capacity.jmx`: 10 steps from 10 to 100 users (+10 per step), each step 30 s ramp-up + 180 s hold, 100 ms think time. No text_pattern_ops index at that time (the plain `idx_owners_last_name` was present).
 
@@ -170,7 +167,10 @@ Scenario `petclinic_capacity.jmx`: 10 steps from 10 to 100 users (+10 per step),
 
 </details>
 
-## Stability (soak) test
+</details>
+
+<details>
+<summary><h2>Stability (soak) test</h2></summary>
 
 **Goal:** check that response times stay steady and no resource leak appears under a constant load below the maximum.
 
@@ -225,7 +225,10 @@ Scenario `petclinic_capacity.jmx`: 10 steps from 10 to 100 users (+10 per step),
 
 </details>
 
-## Index experiment (search by last name)
+</details>
+
+<details>
+<summary><h2>Index experiment (search by last name)</h2></summary>
 
 This was run as an experiment. The missing prefix index is a property of this lab setup, not a defect in PetClinic.
 
@@ -256,7 +259,10 @@ A plain btree index `idx_owners_last_name` already existed; the planner still ch
 
 **Caveats:** one run per variant, and the run without the index went first, so the JMeter percentages are only a rough guide; the database-side numbers are the main evidence. `GET /owners` is still the slowest request (avg 247 ms in the indexed soak) although the database now spends about 0.14 ms on it. The remaining time is most likely spent in the application and in waiting for CPU on the shared machine (hypothesis, not verified). Both runs lasted 120 minutes, but the table grew differently during them. A shorter pair of 10-minute runs at 70 users is summarised in `docs/index-experiment_10min.txt`.
 
-## CI (GitHub Actions)
+</details>
+
+<details>
+<summary><h2>CI (GitHub Actions)</h2></summary>
 
 On every push to `main` (changes to `*.md` files are ignored), every pull request and on manual trigger, the workflow:
 
@@ -275,7 +281,10 @@ On every push to `main` (changes to `*.md` files are ignored), every pull reques
 
 **Scope.** The CI run is a smoke test. It catches breakages and gross slowdowns, but not small regressions: the load is limited by the think time (about 240-280 req/s), the runner is shared, and JMeter runs on the same machine as the application. Two runs gave p95 of 14 ms and 66 ms, so the spread between runs is large. Do not compare these numbers with the local capacity results. There is **no JMeter HTML report** in CI: generating it ran out of memory (`OutOfMemoryError`) and the cause was not investigated. Prometheus and Grafana are not started in CI.
 
-## Limitations and caveats
+</details>
+
+<details>
+<summary><h2>Limitations and caveats</h2></summary>
 
 - Hardware: a 6 GB machine; the application, PostgreSQL, monitoring and JMeter share one host with 2 CPUs and 3 GB RAM for WSL. Absolute numbers do not represent production hardware; the project demonstrates the method.
 - **Resource limits** (`cpus`, `mem_limit`, `-Xmx400m`) are deliberately small and were chosen to make the bottleneck reproducible on a small machine.
@@ -289,3 +298,5 @@ On every push to `main` (changes to `*.md` files are ignored), every pull reques
 - Plugin: `petclinic_capacity.jmx` requires the Ultimate Thread Group plugin.
 - CI: smoke test only, no HTML report (see above).
 - Think time: `petclinic_capacity.jmx` defaults to 500 ms; all results here were obtained with `-Jthink=100`.
+
+</details>
