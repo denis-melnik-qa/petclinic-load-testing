@@ -127,8 +127,7 @@ Optional recorders while a test runs: `jmeter/record_stats.sh out.csv`, `jmeter/
 - **Metrics:** JMeter results for response times; Prometheus/Grafana for JVM, HikariCP and PostgreSQL; `docker stats` and `pg_stat_statements` for resources and queries.
 
 </details>
-<details>
-<summary><h2>Capacity test (step load)</h2></summary>
+<details><summary><h2>Capacity test (step load)</h2></summary>
 
 Scenario `petclinic_capacity.jmx`: 10 steps from 10 to 100 users (+10 per step), each step 30 s ramp-up + 180 s hold, 100 ms think time. No text_pattern_ops index at that time (the plain `idx_owners_last_name` was present).
 
@@ -149,10 +148,6 @@ Scenario `petclinic_capacity.jmx`: 10 steps from 10 to 100 users (+10 per step),
 
 **Confirmation:** a separate 10-minute run at 70 users (60 s ramp-up): 167 req/s, avg 310 ms, p95 851 ms, p99 1304 ms, 0% errors (`docs/baseline-70users-summary.txt`). The slowest request is the search by last name (`GET /owners`): p95 1176 ms, above 1 s on its own, while the overall p95 is lower because the other requests are faster (`docs/baseline-70users-per-request.txt`).
 
-**Observations**
-- From about 40 users the application and the database together use about 180% CPU of the 2 cores available to Docker (Grafana observation, combined figure, not a JMeter metric). This points to CPU saturation of the whole host.
-- JMeter counts about 157 req/s; the server sees roughly 1.4x more requests because of redirects after POST, which explains the higher request rate in Grafana.
-
 <details>
 <summary>Grafana screenshots: capacity test and 70-user confirmation run</summary>
 
@@ -163,6 +158,12 @@ Scenario `petclinic_capacity.jmx`: 10 steps from 10 to 100 users (+10 per step),
 ![Confirmation run at 70 users](docs/confirm/confirm_rps_avg_time.PNG)
 
 </details>
+
+**Observations**
+- From about 40 users the application and the database together use about 180% CPU of the 2 cores available to Docker (Grafana observation, combined figure, not a JMeter metric). This points to CPU saturation of the whole host.
+- JMeter counts about 157 req/s; the server sees roughly 1.4x more requests because of redirects after POST, which explains the higher request rate in Grafana.
+
+
 </details>
 <details>
 <summary><h2>Stability (soak) test</h2></summary>
