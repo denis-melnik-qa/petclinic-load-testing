@@ -33,8 +33,9 @@ JMeter (on the host) --HTTP--> app :8080 --JDBC--> postgres
 
 **Data** (`db/generate_data.sql`): about 100,000 owners, 100,000 pets, 200,000 visits, 909 distinct last names. The distribution of pets per owner was not analysed.
 
-### Repository layout
-
+<details>
+<summary><h3>Repository layout</h3></summary>
+  
 | Path | Purpose |
 |---|---|
 | `docker-compose.yml`, `docker-compose.override.yml`, `app/Dockerfile`, `prometheus/prometheus.yml` | the stand |
@@ -55,7 +56,8 @@ JMeter (on the host) --HTTP--> app :8080 --JDBC--> postgres
 | `docs/` | screenshots and text summaries of the runs |
 
 `results/` and `*.jtl` are git-ignored.
-
+  
+</details>
 </details>
 <details>
 <summary><h2>How to run</h2></summary>
