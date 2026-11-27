@@ -148,22 +148,18 @@ Scenario `petclinic_capacity.jmx`: 10 steps from 10 to 100 users (+10 per step),
 
 **Confirmation:** a separate 10-minute run at 70 users (60 s ramp-up): 167 req/s, avg 310 ms, p95 851 ms, p99 1304 ms, 0% errors (`docs/baseline-70users-summary.txt`). The slowest request is the search by last name (`GET /owners`): p95 1176 ms, above 1 s on its own, while the overall p95 is lower because the other requests are faster (`docs/baseline-70users-per-request.txt`).
 
-<details>
-<summary>Grafana screenshots: capacity test and 70-user confirmation run</summary>
+**Observations**
+- From about 40 users the application and the database together use about 180% CPU of the 2 cores available to Docker (Grafana observation, combined figure, not a JMeter metric). This points to CPU saturation of the whole host.
+- JMeter counts about 157 req/s; the server sees roughly 1.4x more requests because of redirects after POST, which explains the higher request rate in Grafana.
 
+<details>
+<summary><mark>Grafana screenshots:</mark> capacity test and 70-user confirmation run</summary>
 ![Capacity test: requests per second and average response time](docs/capacity/capacity_rps_avg.PNG)
 ![Capacity test: p95 and 5xx](docs/capacity/capacity_p95_5xx.PNG)
 ![Capacity test: application](docs/capacity/capacity_app.PNG)
 ![Capacity test: database](docs/capacity/capacity_db.PNG)
 ![Confirmation run at 70 users](docs/confirm/confirm_rps_avg_time.PNG)
-
 </details>
-
-**Observations**
-- From about 40 users the application and the database together use about 180% CPU of the 2 cores available to Docker (Grafana observation, combined figure, not a JMeter metric). This points to CPU saturation of the whole host.
-- JMeter counts about 157 req/s; the server sees roughly 1.4x more requests because of redirects after POST, which explains the higher request rate in Grafana.
-
-
 </details>
 <details>
 <summary><h2>Stability (soak) test</h2></summary>
