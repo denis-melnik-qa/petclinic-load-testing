@@ -200,7 +200,7 @@ Scenario `petclinic_capacity.jmx`: 10 steps from 10 to 100 users (+10 per step),
 - Each run had one short stall (about 97 minutes in the first run, about 12 minutes in the second, approximate): roughly 50-130 requests took over 3 s, maximum 6-7 s, about one request per virtual user. GC pauses were at most 0.25 s, there was no restart, and checkpoints ran about every 5 minutes with `sync` of about 1 s or less, so none of these explains it. The cause was not identified.
 
 <details>
-<summary>Grafana screenshots: soak without index</summary>
+<summary>📊 Grafana screenshots: soak without index</summary>
 
 ![Soak without index: RPS and average response time](docs/soak/withoutIndexes/soak_woi_rps_avg.PNG)
 ![Soak without index: p95 and 5xx](docs/soak/withoutIndexes/soak_woi_p95_5xx.PNG)
@@ -242,7 +242,7 @@ A plain btree index `idx_owners_last_name` already existed; the planner still ch
 **Caveats:** one run per variant, and the run without the index went first, so the JMeter percentages are only a rough guide; the database-side numbers are the main evidence. `GET /owners` is still the slowest request (avg 247 ms in the indexed soak) although the database now spends about 0.14 ms on it. The remaining time is most likely spent in the application and in waiting for CPU on the shared machine (hypothesis, not verified). Both runs lasted 120 minutes, but the table grew differently during them. A shorter pair of 10-minute runs at 70 users is summarised in `docs/index-experiment_10min.txt`.
 
 <details>
-<summary>Grafana screenshots: soak with index</summary>
+<summary>📊 Grafana screenshots: soak with index</summary>
 
 ![Soak with index: RPS and average response time](docs/soak/withIndexes/soak_wi_rps_avg.PNG)
 ![Soak with index: p95 and 5xx](docs/soak/withIndexes/soak_wi_p95_5xx.PNG)
