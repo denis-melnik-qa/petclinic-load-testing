@@ -153,7 +153,7 @@ Scenario `petclinic_capacity.jmx`: 10 steps from 10 to 100 users (+10 per step),
 - JMeter counts about 157 req/s; the server sees roughly 1.4x more requests because of redirects after POST, which explains the higher request rate in Grafana.
 
 <details>
-<summary><code>Grafana screenshots: capacity test and 70-user confirmation run</code></summary>
+<summary><mark>Grafana screenshots: capacity test and 70-user confirmation run</mark></summary>
 
 ![Capacity test: requests per second and average response time](docs/capacity/capacity_rps_avg.PNG)
 ![Capacity test: p95 and 5xx](docs/capacity/capacity_p95_5xx.PNG)
